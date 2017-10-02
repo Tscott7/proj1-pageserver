@@ -94,6 +94,7 @@ def respond(sock):
         transmit(STATUS_OK, sock)
         for i in parts:
             transmit(str(i), sock)
+            transmit(" ", sock)
     else:
         log.info("Unhandled request: {}".format(request))
         transmit(STATUS_NOT_IMPLEMENTED, sock)
