@@ -83,15 +83,15 @@ def respond(sock):
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
         transmit(STATUS_OK, sock)
-        for i in parts:
-            transmit(str(i), sock)
-            transmit(" ", sock)
-        if (".." or "~") in parts[1]:
+        if ("..") in parts[1]:
+            transmit(STATUS_FORBIDDEN, sock)
+        if ("~") in parts[1]:
             transmit(STATUS_FORBIDDEN, sock)
         if (os.path.isfile(parts[1])):
             transmit("FILE EXISTS", sock)
         else:
-            transmit("FILE DOES NOT EXIST", sock)
+            transmit("FILE DOES NOT EXIST ", sock)
+            transmit(os.path.abspath(parts[1]), sock)
 
 
     else:
