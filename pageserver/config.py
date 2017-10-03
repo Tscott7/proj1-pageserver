@@ -4,16 +4,13 @@ Configure from
    credentials.ini
    command line  (unless invoked with proxied=True)
 in that order (i.e., in opposite order of precedence).
-
 A configuration namespace module returned by this module is
 suitable for configuring a Flask applicaton object.
 (Not relevant to project 1)
-
 configparser makes all configuration variables  lower case;
 Flask configuration object recognizes only upper case configuration
 variables.  To resolve this conflict, we convert all configuration
 variables from .ini files to upper case.
-
 Potential extensions:
   - Use environment variables?  With what precedence relative
     to configuration files? (NO, for now)
@@ -109,7 +106,6 @@ def configuration(proxied=False):
     Returns namespace (that is, object) of configuration
     values, giving precedence to command line arguments over
     configuration file values.
-
     When proxied = True, the command line is not read; all
     configuration must come from the config.ini file.  A proxy
     like gunicorn may not use some some configuration values,

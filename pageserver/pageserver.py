@@ -68,7 +68,6 @@ STATUS_FORBIDDEN = "HTTP/1.0 403 Forbidden\n\n"
 STATUS_NOT_FOUND = "HTTP/1.0 404 Not Found\n\n"
 STATUS_NOT_IMPLEMENTED = "HTTP/1.0 401 Not Implemented\n\n"
 
-
 def respond(sock):
     """
     This server responds only to GET requests (not PUT, POST, or UPDATE).
@@ -79,20 +78,33 @@ def respond(sock):
     request = str(request, encoding='utf-8', errors='strict')
     log.info("--- Received request ----")
     log.info("Request was {}\n***\n".format(request))
-
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
         transmit(STATUS_OK, sock)
         if ("..") in parts[1]:
             transmit(STATUS_FORBIDDEN, sock)
+            pass
         if ("~") in parts[1]:
             transmit(STATUS_FORBIDDEN, sock)
-        if (os.path.isfile(parts[1])):
-            transmit("FILE EXISTS", sock)
+            pass
+        if ("//") in parts[1]:
+            transmit(STATUS_FORBIDDEN, sock)
+            pass
+        if not parts[1].endswith((".html") or (".css")):
+            transmit(STATUS_FORBIDDEN, sock)
+            pass
         else:
-            transmit("FILE DOES NOT EXIST ", sock)
-            transmit(os.path.abspath(parts[1]), sock)
-
+            source_path = os.path.join(DOCROOT, parts[1][1:])
+            log.debug("Source path: {}".format(source_path))
+            try:
+                with open(source_path, 'r', encoding='utf-8') as source:
+                    for line in source:
+                        transmit(line.strip(), sock)
+            except OSError as error:
+                log.warn("Failed to open or read file")
+                log.warn("Requested file was {}".format(source_path))
+                log.warn("Exception: {}".format(error))
+                transmit(STATUS_NOT_FOUND, sock)
 
     else:
         log.info("Unhandled request: {}".format(request))
@@ -137,7 +149,9 @@ def get_options():
 
 
 def main():
+    global DOCROOT
     options = get_options()
+    DOCROOT = options.DOCROOT
     port = options.PORT
     if options.DEBUG:
         log.setLevel(logging.DEBUG)
@@ -145,7 +159,6 @@ def main():
     log.info("Listening on port {}".format(port))
     log.info("Socket is {}".format(sock))
     serve(sock, respond)
-
 
 if __name__ == "__main__":
     main()
